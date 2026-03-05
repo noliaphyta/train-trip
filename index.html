@@ -264,6 +264,24 @@
     .timeline-scroll::-webkit-scrollbar { height:6px; }
     .timeline-scroll::-webkit-scrollbar-track { background:var(--paper-dark); }
     .timeline-scroll::-webkit-scrollbar-thumb { background:var(--ink-faint); }
+
+    /* ── NAV ── */
+    .nav-bar {
+      border-bottom: 2px solid var(--ink);
+      padding: 10px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: var(--paper-dark);
+      font-family: 'Special Elite', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      margin-bottom: 0;
+    }
+    .nav-bar a { color: var(--ink-faint); text-decoration: none; transition: color 0.15s; }
+    .nav-bar a:hover, .nav-bar a.active { color: var(--ink); }
+    .nav-bar a.active { border-bottom: 2px solid var(--ink); padding-bottom: 1px; }
+    .nav-sep { color: var(--ink-faint); opacity: 0.4; }
     .timetable-outer::-webkit-scrollbar { height:6px; width:6px; }
     .timetable-outer::-webkit-scrollbar-track { background:var(--paper-dark); }
     .timetable-outer::-webkit-scrollbar-thumb { background:var(--ink-faint); }
@@ -282,6 +300,12 @@
 <body>
 
 <button id="dark-toggle" onclick="toggleDark()">☽ dark</button>
+
+<div class="nav-bar">
+  <a href="index.html" class="active">🗺 Trip Overview</a>
+  <span class="nav-sep">/</span>
+  <a href="scrapbook.html">📷 Scrapbook</a>
+</div>
 
 <div class="page">
 
