@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>USA Rail Pass · Spring Break 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --paper:       #f3ead6;
+      --paper-mid:   #ecddc0;
+      --paper-dark:  #e2d0a8;
+      --ink:         #1c130a;
+      --ink-faint:   #7a6040;
+      --ink-rule:    rgba(120,90,50,0.15);
+      --stamp-red:   #a01818;
+    }
+
+    body {
+      background-color: var(--paper);
+      background-image: repeating-linear-gradient(transparent, transparent 31px, var(--ink-rule) 31px, var(--ink-rule) 32px);
+      background-size: 100% 32px;
+      font-family: 'Caveat', cursive;
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    .page { max-width: 980px; margin: 0 auto; padding: 40px 28px 60px; }
+
+    .header { text-align: center; margin-bottom: 44px; }
+    .stamp-row { display: flex; gap: 12px; justify-content: center; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+    .stamp { display: inline-block; border: 2.5px solid var(--stamp-red); color: var(--stamp-red); padding: 3px 14px 2px; font-family: 'Special Elite', monospace; font-size: 0.75rem; letter-spacing: 0.18em; transform: rotate(-1.5deg); }
+    .stamp.blue { border-color: #1a3e70; color: #1a3e70; transform: rotate(1deg); }
+    .header h1 { font-family: 'Special Elite', monospace; font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.15; letter-spacing: 0.04em; }
+    .header .sub { font-size: 1.1rem; color: var(--ink-faint); margin-top: 6px; }
+    .header .route-line { font-size: 1rem; color: var(--ink-faint); margin-top: 4px; font-style: italic; }
+
+    .section-label { font-family: 'Special Elite', monospace; font-size: 0.85rem; letter-spacing: 0.12em; color: var(--ink-faint); border-bottom: 1.5px solid var(--ink-faint); padding-bottom: 4px; margin-bottom: 14px; text-transform: uppercase; }
+
+    .stats-bar { display: flex; border: 2px solid var(--ink); margin-bottom: 36px; flex-wrap: wrap; }
+    .stat { flex: 1 1 120px; padding: 10px 14px; border-right: 1.5px solid var(--ink); text-align: center; }
+    .stat:last-child { border-right: none; }
+    .stat-num { display: block; font-size: 1.9rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.75rem; color: var(--ink-faint); letter-spacing: 0.05em; }
+
+    .timeline-section { margin-bottom: 36px; }
+    .timeline-scroll { overflow-x: auto; padding-bottom: 6px; }
+    .timeline-inner { min-width: max-content; position: relative; }
+
+    .day-row { display: flex; }
+    .day-cell { width: 96px; flex-shrink: 0; border: 2px solid var(--ink); border-right: none; padding: 8px 8px 6px; background: var(--paper); cursor: pointer; user-select: none; transition: background 0.12s; position: relative; }
+    .day-cell:last-child { border-right: 2px solid var(--ink); }
+    .day-cell:hover, .day-cell.active { background: var(--paper-mid); }
+    .day-cell.active::after { content:''; position:absolute; bottom:-3px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:8px solid transparent; border-right:8px solid transparent; border-top:6px solid var(--ink); z-index:2; }
+    .day-num { font-size: 2rem; font-weight: 700; line-height: 1; display: block; }
+    .day-dow { font-size: 0.72rem; color: var(--ink-faint); display: block; margin-top: 1px; }
+    .day-dots { display: flex; gap: 2px; margin-top: 5px; flex-wrap: wrap; }
+    .day-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+    .bars-row { position: relative; height: 28px; background: var(--paper-dark); border: 2px solid var(--ink); border-top: none; }
+    .train-bar { position: absolute; height: 20px; top: 4px; border-radius: 1px; cursor: pointer; display: flex; align-items: center; padding: 0 6px; overflow: hidden; white-space: nowrap; font-size: 0.62rem; color: rgba(255,255,255,0.92); letter-spacing: 0.02em; border-left: 2px solid rgba(0,0,0,0.2); transition: filter 0.1s; }
+    .train-bar:hover { filter: brightness(1.15); }
+
+    .info-panel { display: none; border: 2px solid var(--ink); border-top: none; padding: 16px 20px; background: var(--paper); position: relative; animation: slideDown 0.15s ease; }
+    @keyframes slideDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+    .info-panel.open { display: block; }
+    .panel-close { position:absolute; top:10px; right:14px; background:none; border:1px solid var(--ink-faint); font-family:'Caveat',cursive; font-size:0.9rem; cursor:pointer; padding:1px 8px; color:var(--ink-faint); }
+    .panel-close:hover { background: var(--paper-mid); }
+    .panel-title { font-family:'Special Elite',monospace; font-size:1.25rem; margin-bottom:10px; padding-left:14px; border-left-width:4px; border-left-style:solid; }
+    .panel-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px 20px; font-size:0.95rem; }
+    .panel-item span.label { font-size:0.7rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.05em; display:block; }
+    .panel-note { margin-top:10px; font-size:0.95rem; color:var(--ink-faint); border-top:1px dashed var(--ink-faint); padding-top:8px; }
+    .warn { color:var(--stamp-red)!important; font-weight:600; }
+
+    .map-section { margin-bottom: 36px; }
+    .map-wrap { border: 2px solid var(--ink); padding: 16px 16px 8px; background: var(--paper); position: relative; }
+    #route-map { width: 100%; height: auto; display: none; }
+    #map-loading { text-align:center; color:var(--ink-faint); font-size:1rem; padding:40px 0; }
+    .map-caption { text-align:center; font-size:0.8rem; color:var(--ink-faint); margin-top:6px; }
+
+    .legend { display:flex; flex-wrap:wrap; gap:8px 18px; padding:10px 14px; border:2px solid var(--ink); border-top:none; background:var(--paper-dark); }
+    .legend-item { display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer; }
+    .legend-swatch { width:22px; height:10px; flex-shrink:0; }
+
+    .bottom-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:28px; }
+    @media (max-width:600px) { .bottom-grid { grid-template-columns:1fr; } }
+    .card { border:2px solid var(--ink); padding:16px; }
+    .card h2 { font-family:'Special Elite',monospace; font-size:1.1rem; margin-bottom:12px; padding-bottom:6px; border-bottom:1px dashed var(--ink-faint); }
+
+    .meals-table { width:100%; font-size:0.95rem; }
+    .meals-table tr td { padding:4px 0; border-bottom:1px solid var(--ink-rule); }
+    .meals-table tr:last-child td { border-bottom:none; }
+    .meals-table .count { font-weight:700; font-size:1.15rem; text-align:right; }
+    .meals-note { margin-top:10px; font-size:0.85rem; color:var(--ink-faint); padding-top:8px; border-top:1px dashed var(--ink-faint); }
+
+    .pack-list { list-style:none; font-size:0.95rem; }
+    .pack-list li { padding:4px 0 4px 18px; position:relative; border-bottom:1px solid var(--ink-rule); }
+    .pack-list li:last-child { border-bottom:none; }
+    .pack-list li::before { content:'—'; position:absolute; left:0; color:var(--ink-faint); }
+
+    .layovers-section { margin-bottom:28px; }
+    .layovers-wrap { border:2px solid var(--ink); padding:12px 14px; display:flex; flex-wrap:wrap; gap:8px; }
+    .layover-badge { display:inline-block; border:1.5px solid var(--ink); padding:3px 10px; font-size:0.88rem; transform:rotate(var(--r,0deg)); background:var(--paper-dark); }
+
+    .footer { border-top:1px solid var(--ink-faint); padding-top:12px; font-size:0.82rem; color:var(--ink-faint); text-align:center; }
+    .footer .critical { color:var(--stamp-red); font-weight:600; }
+
+    .tt { position:fixed; background:var(--ink); color:var(--paper); padding:5px 10px; font-size:0.82rem; font-family:'Caveat',cursive; pointer-events:none; z-index:999; white-space:nowrap; display:none; }
+
+    .timeline-scroll::-webkit-scrollbar { height:6px; }
+    .timeline-scroll::-webkit-scrollbar-track { background:var(--paper-dark); }
+    .timeline-scroll::-webkit-scrollbar-thumb { background:var(--ink-faint); }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="stamp-row">
+      <span class="stamp">AMTRAK USA 250 PASS</span>
+      <span class="stamp blue">8 TRAINS · 9 DAYS</span>
+    </div>
+    <h1>USA Rail Pass<br>Spring Break 2026</h1>
+    <p class="sub">March 6 – 14 &nbsp;·&nbsp; ignoring timezone changes</p>
+    <p class="route-line">Williamsburg → Washington → Chicago → Sacramento → Portland → Chicago → Albany → Boston → Williamsburg</p>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat"><span class="stat-num">9</span><span class="stat-label">days</span></div>
+    <div class="stat"><span class="stat-num">8</span><span class="stat-label">trains</span></div>
+    <div class="stat"><span class="stat-num">7,014</span><span class="stat-label">miles tracked</span></div>
+    <div class="stat"><span class="stat-num">4</span><span class="stat-label">time zones</span></div>
+    <div class="stat"><span class="stat-num">6</span><span class="stat-label">layovers</span></div>
+  </div>
+
+  <div class="timeline-section">
+    <div class="section-label">/ the journey — click any day or train bar /</div>
+    <div class="timeline-scroll">
+      <div class="timeline-inner" id="timeline-inner">
+        <div class="day-row" id="day-row"></div>
+        <div class="bars-row" id="bars-row"></div>
+      </div>
+    </div>
+    <div class="info-panel" id="info-panel">
+      <button class="panel-close" onclick="closePanel()">✕ close</button>
+      <div id="panel-content"></div>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <div class="section-label">/ the route /</div>
+    <div class="map-wrap">
+      <div id="map-loading">loading map…</div>
+      <svg id="route-map" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg"></svg>
+      <p class="map-caption">hover over stations · click route lines for details</p>
+    </div>
+    <div class="legend" id="map-legend"></div>
+  </div>
+
+  <div class="bottom-grid">
+    <div class="card">
+      <h2>meals on board</h2>
+      <table class="meals-table">
+        <tr><td>☕ breakfast</td><td class="count">8×</td><td style="font-size:0.78rem;color:var(--ink-faint);padding-left:8px">+1 in Boston = 9</td></tr>
+        <tr><td>🥪 lunch</td><td class="count">7×</td><td style="font-size:0.78rem;color:var(--ink-faint);padding-left:8px">+2 layover = 9</td></tr>
+        <tr><td>🍽 dinner</td><td class="count">7×</td><td style="font-size:0.78rem;color:var(--ink-faint);padding-left:8px">+2 layover = 9</td></tr>
+      </table>
+      <div class="meals-note">14 actual meals + 8 bagels<br>12 standard + 2 nice dining car meals</div>
+    </div>
+    <div class="card">
+      <h2>things to pack</h2>
+      <ul class="pack-list">
+        <li>wipes, towel, toiletries, basin</li>
+        <li>9 days of clothes — 5× each at least</li>
+        <li>blanket + pillows</li>
+        <li>water heater, utensils, gallon jug</li>
+        <li>chargers, sketchbook</li>
+        <li>glasses, emergency stuff, slippers</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layovers-section">
+    <div class="section-label">/ layovers /</div>
+    <div class="layovers-wrap">
+      <span class="layover-badge" style="--r:-1.5deg">4 hrs · Washington DC (WAS)</span>
+      <span class="layover-badge" style="--r:0.8deg">3 hrs · Chicago (CHI)</span>
+      <span class="layover-badge" style="--r:-0.5deg">7 hrs · Sacramento (SAC)</span>
+      <span class="layover-badge" style="--r:1.2deg">1 hr · Portland (PDX)</span>
+      <span class="layover-badge" style="--r:-0.8deg">4½ hrs · Chicago (CHI)</span>
+      <span class="layover-badge" style="--r:1.5deg">12 hrs · Boston (BOS)</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p><span class="critical">⚠ Train #99 NE Regional BOS→WBG on March 14 is the last option.</span> The following day is fully booked — this train cannot be missed.</p>
+    <p style="margin-top:6px">USA Rail Pass · Spring Break 2026 · 9 days ignoring timezone changes</p>
+  </div>
+</div>
+
+<div class="tt" id="tt"></div>
+
+<script>
+/* ─── TRAIN DATA ────────────────────────────────── */
+const trains = [
+  { id:'ne164',    num:164,  name:'Northeast Regional', from:'WBG', fromFull:'Williamsburg, VA', to:'WAS', toFull:'Washington, DC',  date:'Mar 6',     color:'#8b2020', miles:113,  hours:2,  tStart:0.00, tEnd:0.22, notes:'Short hop from home to Washington Union Station — the adventure begins.', layoverAfter:null, meals:'', highlight:'Northeast Corridor' },
+  { id:'cardinal', num:51,   name:'Cardinal',           from:'WAS', fromFull:'Washington, DC',   to:'CHI', toFull:'Chicago, IL',     date:'Mar 6–7',   color:'#5c2278', miles:1146, hours:17, tStart:0.35, tEnd:1.55, notes:'Through the gorgeous West Virginia mountains — one of Amtrak\'s most scenic routes. Overnight.', layoverAfter:'3 hrs in Chicago', meals:'D · B', highlight:'Most scenic — West Virginia mountains' },
+  { id:'cz1005',   num:1005, name:'California Zephyr',  from:'CHI', fromFull:'Chicago, IL',      to:'SAC', toFull:'Sacramento, CA',  date:'Mar 7–9',   color:'#b84e00', miles:1788, hours:51, tStart:1.72, tEnd:3.42, notes:'The classic! Rockies, Colorado River canyon, Nevada desert, Sierras. Two nights on board.', layoverAfter:'7 hrs in Sacramento', meals:'D · B · L · D · B', highlight:'Most scenic overall — Rockies + Sierras' },
+  { id:'cs14',     num:14,   name:'Coast Starlight',    from:'SAC', fromFull:'Sacramento, CA',   to:'PDX', toFull:'Portland, OR',    date:'Mar 9–10',  color:'#1d6637', miles:463,  hours:16, tStart:3.60, tEnd:4.28, notes:'Overnight through Northern California and Oregon. Pacific coast at sunrise.', layoverAfter:'1 hr in Portland', meals:'D · B', highlight:'Pacific coast + Cascades' },
+  { id:'eb28',     num:28,   name:'Empire Builder',     from:'PDX', fromFull:'Portland, OR',     to:'CHI', toFull:'Chicago, IL',     date:'Mar 10–12', color:'#1a3e70', miles:2257, hours:46, tStart:4.42, tEnd:6.38, notes:'Longest leg — northern route via Glacier Country, Montana, and Minnesota. Two full nights.', layoverAfter:'4½ hrs in Chicago', meals:'D · B · L · D · B', highlight:'Longest stretch — Glacier country + Great Plains' },
+  { id:'lsl48',    num:48,   name:'Lake Shore Limited', from:'CHI', fromFull:'Chicago, IL',      to:'ALB', toFull:'Albany, NY',      date:'Mar 12–13', color:'#6e1818', miles:1018, hours:20, tStart:6.56, tEnd:7.42, notes:'Great Lakes views then overnight to Albany, where the Boston section splits off.', layoverAfter:null, meals:'D · B', highlight:'Great Lakes shoreline' },
+  { id:'lsl448',   num:448,  name:'Lake Shore Limited', from:'ALB', fromFull:'Albany, NY',       to:'BOS', toFull:'Boston, MA',      date:'Mar 13',    color:'#6e1818', miles:229,  hours:3,  tStart:7.50, tEnd:7.85, notes:'Boston section splits from Albany. Short hop through the Hudson Valley into South Station.', layoverAfter:'12 hrs in Boston', meals:'L', highlight:'Hudson Valley scenery' },
+  { id:'ne99',     num:99,   name:'Northeast Regional', from:'BOS', fromFull:'Boston, MA',       to:'WBG', toFull:'Williamsburg, VA',date:'Mar 14',    color:'#8b2020', miles:null, hours:9,  tStart:8.00, tEnd:8.95, notes:'⚠ CRITICAL: Final train home. March 15 is fully booked — this train cannot be missed!', layoverAfter:null, meals:'B · L', highlight:'Hells Gate Bridge + Northeast Corridor' }
+];
+
+/* ─── TIMELINE ──────────────────────────────────── */
+const DAY_W = 96;
+const DAYS  = [6,7,8,9,10,11,12,13,14];
+const DOWS  = ['Fri','Sat','Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const totalW = DAY_W * DAYS.length;
+
+document.getElementById('timeline-inner').style.width = totalW + 'px';
+document.getElementById('bars-row').style.width = totalW + 'px';
+
+const dayTrainMap = {};
+DAYS.forEach(d => dayTrainMap[d] = []);
+trains.forEach(t => {
+  for (let d = Math.floor(t.tStart)+6; d <= Math.min(14, Math.ceil(t.tEnd)+6); d++)
+    if (dayTrainMap[d]) dayTrainMap[d].push(t);
+});
+
+DAYS.forEach((d, i) => {
+  const cell = document.createElement('div');
+  cell.className = 'day-cell';
+  cell.dataset.day = d;
+  const dots = dayTrainMap[d].map(t => `<div class="day-dot" style="background:${t.color}"></div>`).join('');
+  cell.innerHTML = `<span class="day-num">${d}</span><span class="day-dow">${DOWS[i]}</span><div class="day-dots">${dots}</div>`;
+  cell.addEventListener('click', () => openDay(d, cell));
+  document.getElementById('day-row').appendChild(cell);
+});
+
+trains.forEach(t => {
+  const left = t.tStart * DAY_W, width = (t.tEnd - t.tStart) * DAY_W;
+  const bar = document.createElement('div');
+  bar.className = 'train-bar';
+  bar.style.cssText = `left:${left}px;width:${width}px;background:${t.color};`;
+  bar.textContent = width > 40 ? `#${t.num} ${t.name}` : `#${t.num}`;
+  bar.addEventListener('click', () => openTrain(t));
+  bar.addEventListener('mouseenter', e => showTT(e, `#${t.num} ${t.name} · ${t.fromFull} → ${t.toFull}`));
+  bar.addEventListener('mousemove', moveTT);
+  bar.addEventListener('mouseleave', hideTT);
+  document.getElementById('bars-row').appendChild(bar);
+});
+
+/* ─── INFO PANEL ────────────────────────────────── */
+function openTrain(t) {
+  document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('active'));
+  const milesTxt = t.miles ? `${t.miles.toLocaleString()} mi` : 'NE Corridor';
+  const warnClass = t.id === 'ne99' ? 'warn' : '';
+  document.getElementById('panel-content').innerHTML = `
+    <div class="panel-title" style="border-left-color:${t.color}">#${t.num} ${t.name}</div>
+    <div class="panel-grid">
+      <div class="panel-item"><span class="label">From</span>${t.fromFull}</div>
+      <div class="panel-item"><span class="label">To</span>${t.toFull}</div>
+      <div class="panel-item"><span class="label">Date</span>${t.date}</div>
+      <div class="panel-item"><span class="label">Distance</span>${milesTxt}</div>
+      <div class="panel-item"><span class="label">Duration</span>~${t.hours}h</div>
+      ${t.layoverAfter ? `<div class="panel-item"><span class="label">Layover after</span>${t.layoverAfter}</div>` : ''}
+      ${t.meals ? `<div class="panel-item"><span class="label">Meals</span>${t.meals}</div>` : ''}
+      <div class="panel-item"><span class="label">Scenery</span>${t.highlight}</div>
+    </div>
+    <p class="panel-note ${warnClass}">${t.notes}</p>`;
+  document.getElementById('info-panel').classList.add('open');
+  document.getElementById('info-panel').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function openDay(d, cellEl) {
+  if (cellEl.classList.contains('active')) { closePanel(); return; }
+  document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('active'));
+  cellEl.classList.add('active');
+  const dayT = dayTrainMap[d];
+  const dow = DOWS[d - 6];
+  const items = dayT.length
+    ? dayT.map(t => `<div style="margin-bottom:10px;padding:8px 10px;border-left:3px solid ${t.color};background:var(--paper-dark)"><strong>#${t.num} ${t.name}</strong> &nbsp;<span style="color:var(--ink-faint);font-size:0.85rem">${t.fromFull} → ${t.toFull}</span><br><span style="color:var(--ink-faint);font-size:0.88rem">${t.notes}</span></div>`).join('')
+    : `<p style="color:var(--ink-faint)">Rest / transition day.</p>`;
+  document.getElementById('panel-content').innerHTML =
+    `<div class="panel-title" style="border-left-color:var(--ink)">March ${d} · ${dow}</div>${items}`;
+  document.getElementById('info-panel').classList.add('open');
+  document.getElementById('info-panel').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function closePanel() {
+  document.getElementById('info-panel').classList.remove('open');
+  document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('active'));
+}
+
+/* ─── ALBERS EQUAL AREA CONIC PROJECTION ────────── */
+// Standard parallels: 29.5° N, 45.5° N  |  Central meridian: −96°  |  Origin: 37.5° N
+const _d2r = Math.PI / 180;
+const _n   = 0.6029317;   // (sin 29.5° + sin 45.5°) / 2
+const _C   = 1.3519046;   // cos²29.5° + 2n·sin 29.5°
+const _r0  = 1.3034903;   // sqrt(C − 2n·sin 37.5°) / n
+const _l0  = -96 * _d2r;
+
+function albersProject(lon, lat) {
+  const phi = lat * _d2r;
+  const rho = Math.sqrt(_C - 2 * _n * Math.sin(phi)) / _n;
+  const theta = _n * (lon * _d2r - _l0);
+  return [rho * Math.sin(theta), _r0 - rho * Math.cos(theta)];
+}
+
+// Fitted so that key stations land at visually correct positions in 800×450 SVG
+const SX = 1045, OX = 417;
+const SY = 647,  OY = 245;
+
+function toSVG(lon, lat) {
+  const [ax, ay] = albersProject(lon, lat);
+  return [ax * SX + OX, -ay * SY + OY];
+}
+
+/* ─── STATIONS ──────────────────────────────────── */
+const stationDefs = [
+  { id:'WBG', label:'Williamsburg, VA', lon:-76.71, lat:37.27 },
+  { id:'WAS', label:'Washington, DC',   lon:-77.03, lat:38.90 },
+  { id:'CHI', label:'Chicago, IL',      lon:-87.63, lat:41.88 },
+  { id:'SAC', label:'Sacramento, CA',   lon:-121.49,lat:38.58 },
+  { id:'PDX', label:'Portland, OR',     lon:-122.68,lat:45.52 },
+  { id:'ALB', label:'Albany, NY',       lon:-73.76, lat:42.65 },
+  { id:'BOS', label:'Boston, MA',       lon:-71.06, lat:42.36 },
+];
+const stMap = {};
+stationDefs.forEach(s => { s.xy = toSVG(s.lon, s.lat); stMap[s.id] = s; });
+
+/* ─── ROUTE SEGMENT META ────────────────────────── */
+const routeSegs = [
+  { from:'WBG', to:'WAS', train:trains[0], label:'113 mi · ~2h',    curveFactor: 0.1,  labelOff:[ 0,-14] },
+  { from:'WAS', to:'CHI', train:trains[1], label:'1,146 mi · ~17h', curveFactor: 0.12, labelOff:[ 0,-18] },
+  { from:'CHI', to:'SAC', train:trains[2], label:'1,788 mi · ~51h', curveFactor:-0.10, labelOff:[ 0, 20] },
+  { from:'SAC', to:'PDX', train:trains[3], label:'463 mi · ~16h',   curveFactor: 0.15, labelOff:[-24, 0] },
+  { from:'PDX', to:'CHI', train:trains[4], label:'2,257 mi · ~46h', curveFactor: 0.12, labelOff:[ 0, 22] },
+  { from:'CHI', to:'ALB', train:trains[5], label:'1,018 mi · ~20h', curveFactor:-0.12, labelOff:[ 0,-20] },
+  { from:'ALB', to:'BOS', train:trains[6], label:'229 mi · ~3h',    curveFactor:-0.15, labelOff:[ 0,-14] },
+  { from:'BOS', to:'WBG', train:trains[7], label:'~9h',             curveFactor: 0.10, labelOff:[ 28, 8] },
+];
+
+/* ─── TIMEZONE BOUNDARY LINES (lon/lat) ─────────── */
+// Pacific / Mountain boundary
+const tzPacMtn = [[-117,49],[-117,46],[-116.5,44.5],[-117,42.3],[-114.7,37],[-114.6,35],[-114.6,32]];
+// Mountain / Central boundary
+const tzMtnCen = [[-104,49],[-104,45],[-104,41],[-103,37],[-100,34],[-100,28.5],[-97.4,25.9]];
+// Central / Eastern boundary
+const tzCenEst = [[-88.5,48.5],[-87.5,46],[-87.5,43],[-87.5,42],[-85.5,42],[-84.8,41.8],[-84.8,40],[-84.5,37.5],[-87.5,35],[-88,33],[-88,31],[-89.5,30],[-90,29]];
+
+/* ─── DRAW MAP ──────────────────────────────────── */
+async function drawMap() {
+  const NS  = 'http://www.w3.org/2000/svg';
+  const svg = document.getElementById('route-map');
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k,v));
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  // Map background
+  el('rect', { x:0,y:0,width:800,height:450,fill:'#ddd3b4' }, svg);
+
+  // ── Load GeoJSON ──
+  let geo;
+  try {
+    const r = await fetch('https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json');
+    geo = await r.json();
+  } catch(err) {
+    document.getElementById('map-loading').textContent = '⚠ map unavailable (network error — works on GitHub Pages)';
+    svg.style.display = 'block';
+    return;
+  }
+  document.getElementById('map-loading').style.display = 'none';
+  svg.style.display = 'block';
+
+  // ── Timezone fill bands ──
+  const tzFills = [
+    { color:'rgba(140,190,170,0.18)', pts:[
+        [-125,50],[-125,24],[-114.6,24],[-114.6,32],[-114.6,35],[-114.7,37],[-117,42.3],[-116.5,44.5],[-117,46],[-117,49],[-125,50]
+    ]},
+    { color:'rgba(200,170,120,0.18)', pts:[
+        [-117,49],[-117,46],[-116.5,44.5],[-117,42.3],[-114.7,37],[-114.6,35],[-114.6,24],
+        [-97.4,24],[-100,28.5],[-100,34],[-103,37],[-104,41],[-104,45],[-104,49]
+    ]},
+    { color:'rgba(140,170,210,0.18)', pts:[
+        [-104,49],[-104,45],[-104,41],[-103,37],[-100,34],[-100,28.5],[-97.4,24],
+        [-81,24],[-89.5,30],[-90,29],[-88,31],[-88,33],[-87.5,35],[-84.5,37.5],
+        [-84.8,40],[-84.8,41.8],[-85.5,42],[-87.5,42],[-87.5,43],[-87.5,46],[-88.5,48.5],[-104,49]
+    ]},
+    { color:'rgba(190,155,200,0.18)', pts:[
+        [-88.5,48.5],[-87.5,46],[-87.5,43],[-87.5,42],[-85.5,42],[-84.8,41.8],[-84.8,40],
+        [-84.5,37.5],[-87.5,35],[-88,33],[-88,31],[-89.5,30],[-81,24],[-65,24],[-65,50]
+    ]}
+  ];
+
+  tzFills.forEach(z => {
+    const pts = z.pts.map(([lon,lat]) => { const [x,y]=toSVG(lon,lat); return `${x.toFixed(1)},${y.toFixed(1)}`; });
+    el('polygon', { points:pts.join(' '), fill:z.color, stroke:'none' }, svg);
+  });
+
+  // ── Draw states ──
+  const skip = new Set(['Alaska','Hawaii','Puerto Rico','Virgin Islands','Guam','American Samoa','Northern Mariana Islands']);
+
+  function ringsToPath(coords) {
+    let d = '';
+    for (const ring of coords) {
+      let first = true;
+      for (const [lon,lat] of ring) {
+        if (lon < -130 || lon > -60 || lat < 22 || lat > 52) continue;
+        const [x,y] = toSVG(lon,lat);
+        d += (first ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+        first = false;
+      }
+      d += 'Z';
+    }
+    return d;
+  }
+
+  geo.features.forEach(f => {
+    if (skip.has(f.properties.name)) return;
+    let d = '';
+    const g = f.geometry;
+    if (g.type === 'Polygon') d = ringsToPath(g.coordinates);
+    else if (g.type === 'MultiPolygon') g.coordinates.forEach(poly => { d += ringsToPath(poly); });
+    if (!d) return;
+    el('path', { d, fill:'rgba(195,180,145,0.4)', stroke:'rgba(70,55,30,0.6)', 'stroke-width':'0.65', 'stroke-linejoin':'round' }, svg);
+  });
+
+  // ── Timezone boundary dashed lines ──
+  function tzLine(pts) {
+    const projected = pts.map(([lon,lat]) => { const [x,y]=toSVG(lon,lat); return `${x.toFixed(1)},${y.toFixed(1)}`; });
+    el('polyline', { points:projected.join(' '), fill:'none', stroke:'rgba(80,60,30,0.35)', 'stroke-width':'1.2', 'stroke-dasharray':'5,4' }, svg);
+  }
+  tzLine(tzPacMtn);
+  tzLine(tzMtnCen);
+  tzLine(tzCenEst);
+
+  // ── Timezone zone labels ──
+  const tzLabels = [
+    { text:'Pacific',  sub:'UTC−8', lon:-119, lat:39.5 },
+    { text:'Mountain', sub:'UTC−7', lon:-111, lat:41   },
+    { text:'Central',  sub:'UTC−6', lon: -93, lat:41.5 },
+    { text:'Eastern',  sub:'UTC−5', lon: -79, lat:40   },
+  ];
+  tzLabels.forEach(z => {
+    const [x,y] = toSVG(z.lon, z.lat);
+    el('text', { x, y, 'font-family':'Special Elite,monospace', 'font-size':'11.5', fill:'rgba(60,45,20,0.60)', 'text-anchor':'middle', 'letter-spacing':'0.04em' }, svg).textContent = z.text;
+    el('text', { x, y:y+14, 'font-family':'Special Elite,monospace', 'font-size':'10', fill:'rgba(60,45,20,0.45)', 'text-anchor':'middle' }, svg).textContent = z.sub;
+  });
+
+  // ── Route segments with mile/hour labels ──
+  routeSegs.forEach(seg => {
+    const f = stMap[seg.from], t = stMap[seg.to];
+    const [fx,fy] = f.xy, [tx,ty] = t.xy;
+    const mx = (fx+tx)/2, my = (fy+ty)/2;
+    const dx = tx-fx, dy = ty-fy;
+    const cx = mx - dy * seg.curveFactor;
+    const cy = my + dx * seg.curveFactor;
+
+    const g = el('g', { style:'cursor:pointer' }, svg);
+
+    // Visible route line
+    el('path', {
+      d:`M${fx.toFixed(1)},${fy.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${tx.toFixed(1)},${ty.toFixed(1)}`,
+      fill:'none', stroke:seg.train.color, 'stroke-width':'3', 'stroke-linecap':'round', opacity:'0.88'
+    }, g);
+
+    // Wide invisible hit target
+    el('path', {
+      d:`M${fx.toFixed(1)},${fy.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${tx.toFixed(1)},${ty.toFixed(1)}`,
+      fill:'none', stroke:'transparent', 'stroke-width':'16'
+    }, g);
+
+    // Distance + duration label (at ~midpoint of quadratic Bezier)
+    const lx = (fx + 2*cx + tx) / 4 + seg.labelOff[0];
+    const ly = (fy + 2*cy + ty) / 4 + seg.labelOff[1];
+    el('text', {
+      x:lx.toFixed(1), y:ly.toFixed(1),
+      'font-family':'Caveat,cursive', 'font-size':'10.5', fill:seg.train.color,
+      'text-anchor':'middle', 'font-weight':'700',
+      'paint-order':'stroke', stroke:'rgba(243,234,214,0.92)',
+      'stroke-width':'3.5', 'stroke-linejoin':'round'
+    }, g).textContent = seg.label;
+
+    g.addEventListener('click', () => openTrain(seg.train));
+    g.addEventListener('mouseenter', e => showTT(e, `#${seg.train.num} ${seg.train.name} — ${seg.label}`));
+    g.addEventListener('mousemove', moveTT);
+    g.addEventListener('mouseleave', hideTT);
+  });
+
+  // ── Station dots + labels ──
+  const labelNudge = {
+    WBG:{ dx: 8, dy:-8,  anchor:'start'  },
+    WAS:{ dx: 8, dy:-8,  anchor:'start'  },
+    CHI:{ dx:-8, dy:-8,  anchor:'end'    },
+    SAC:{ dx: 8, dy: 15, anchor:'start'  },
+    PDX:{ dx: 8, dy: 15, anchor:'start'  },
+    ALB:{ dx:-8, dy:-8,  anchor:'end'    },
+    BOS:{ dx: 8, dy: 15, anchor:'start'  },
+  };
+
+  stationDefs.forEach(s => {
+    const [x,y] = s.xy;
+    const n = labelNudge[s.id] || { dx:8, dy:-8, anchor:'start' };
+    const g = el('g', { style:'cursor:pointer' }, svg);
+
+    el('circle', { cx:x, cy:y, r:'6.5', fill:'rgba(243,234,214,0.96)', stroke:'#1c130a', 'stroke-width':'2.2' }, g);
+
+    el('text', {
+      x:(x+n.dx).toFixed(1), y:(y+n.dy).toFixed(1),
+      'font-family':'Caveat,cursive', 'font-size':'13',
+      fill:'#1c130a', 'text-anchor':n.anchor, 'font-weight':'700',
+      'paint-order':'stroke', stroke:'rgba(243,234,214,0.9)', 'stroke-width':'3.5'
+    }, g).textContent = s.id;
+
+    g.addEventListener('mouseenter', e => showTT(e, s.label));
+    g.addEventListener('mousemove', moveTT);
+    g.addEventListener('mouseleave', hideTT);
+  });
+}
+
+drawMap();
+
+/* ─── LEGEND ────────────────────────────────────── */
+const legend = document.getElementById('map-legend');
+trains.forEach(t => {
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  item.innerHTML = `<svg class="legend-swatch" width="22" height="10" viewBox="0 0 22 10"><rect x="0" y="2" width="22" height="6" fill="${t.color}" rx="1"/></svg><span>#${t.num} ${t.name}</span>`;
+  item.addEventListener('click', () => openTrain(t));
+  legend.appendChild(item);
+});
+
+/* ─── TOOLTIP ───────────────────────────────────── */
+const tt = document.getElementById('tt');
+function showTT(e,text) { tt.textContent=text; tt.style.display='block'; moveTT(e); }
+function moveTT(e) { tt.style.left=(e.clientX+14)+'px'; tt.style.top=(e.clientY-28)+'px'; }
+function hideTT() { tt.style.display='none'; }
+</script>
+</body>
+</html>
