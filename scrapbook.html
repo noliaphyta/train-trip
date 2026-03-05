@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rail Pass Scrapbook · Spring Break 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── THEMES ── */
+    :root {
+      --paper:       #f3ead6;
+      --paper-mid:   #ecddc0;
+      --paper-dark:  #e2d0a8;
+      --ink:         #1c130a;
+      --ink-faint:   #7a6040;
+      --ink-rule:    rgba(120,90,50,0.15);
+      --photo-bg:    #ffffff;
+      --shadow:      rgba(28,19,10,0.22);
+      --tape:        rgba(200,220,255,0.55);
+      --stamp-red:   #a01818;
+    }
+    body.dark {
+      --paper:      #18140e;
+      --paper-mid:  #221d14;
+      --paper-dark: #2c2518;
+      --ink:        #e8dfc8;
+      --ink-faint:  #a89470;
+      --ink-rule:   rgba(200,180,130,0.07);
+      --photo-bg:   #f0e8d8;
+      --shadow:     rgba(0,0,0,0.55);
+      --tape:       rgba(180,200,240,0.25);
+      --stamp-red:  #d44444;
+    }
+
+    body {
+      background-color: var(--paper);
+      background-image: repeating-linear-gradient(transparent, transparent 31px, var(--ink-rule) 31px, var(--ink-rule) 32px);
+      background-size: 100% 32px;
+      font-family: 'Caveat', cursive;
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── DARK TOGGLE ── */
+    #dark-toggle {
+      position: fixed; top: 18px; right: 20px; z-index: 2000;
+      font-family: 'Special Elite', monospace; font-size: 0.72rem;
+      letter-spacing: 0.1em; background: var(--paper-dark); color: var(--ink);
+      border: 2px solid var(--ink-faint); padding: 5px 12px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    #dark-toggle:hover { background: var(--paper-mid); }
+
+    /* ── NAV ── */
+    .nav-bar {
+      border-bottom: 2px solid var(--ink);
+      padding: 10px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: var(--paper-dark);
+      font-family: 'Special Elite', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+    }
+    .nav-bar a {
+      color: var(--ink-faint);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-bar a:hover, .nav-bar a.active { color: var(--ink); }
+    .nav-bar a.active { border-bottom: 2px solid var(--ink); padding-bottom: 1px; }
+    .nav-sep { color: var(--ink-faint); opacity: 0.4; }
+
+    /* ── PAGE ── */
+    .page { max-width: 1040px; margin: 0 auto; padding: 36px 28px 80px; }
+
+    /* ── HEADER ── */
+    .header { text-align: center; margin-bottom: 40px; }
+    .stamp-row { display: flex; gap: 12px; justify-content: center; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+    .stamp { display: inline-block; border: 2.5px solid var(--stamp-red); color: var(--stamp-red); padding: 3px 14px 2px; font-family: 'Special Elite', monospace; font-size: 0.75rem; letter-spacing: 0.18em; transform: rotate(-1.5deg); }
+    .stamp.blue { border-color: #1a3e70; color: #1a3e70; transform: rotate(1deg); }
+    body.dark .stamp.blue { border-color: #4a8ed0; color: #4a8ed0; }
+    .header h1 { font-family: 'Special Elite', monospace; font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.15; letter-spacing: 0.04em; }
+    .header .sub { font-size: 1.05rem; color: var(--ink-faint); margin-top: 6px; font-style: italic; }
+
+    .section-label {
+      font-family: 'Special Elite', monospace; font-size: 0.85rem; letter-spacing: 0.12em;
+      color: var(--ink-faint); border-bottom: 1.5px solid var(--ink-faint);
+      padding-bottom: 4px; margin-bottom: 20px; text-transform: uppercase;
+    }
+
+    /* ── UPLOAD ZONE ── */
+    .upload-section { margin-bottom: 36px; }
+    .upload-zone {
+      border: 2.5px dashed var(--ink-faint);
+      padding: 32px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      background: transparent;
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      background: var(--paper-mid);
+      border-color: var(--ink);
+    }
+    .upload-zone input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 2.4rem; display: block; margin-bottom: 8px; }
+    .upload-zone p { font-size: 1.05rem; color: var(--ink-faint); }
+    .upload-zone .upload-hint { font-size: 0.82rem; color: var(--ink-faint); margin-top: 4px; opacity: 0.7; }
+
+    /* ── SCRAPBOOK GRID ── */
+    .scrapbook-grid {
+      columns: 3 280px;
+      column-gap: 32px;
+    }
+    @media (max-width: 600px) { .scrapbook-grid { columns: 1; } }
+
+    /* ── PHOTO STACK WRAPPER ── */
+    /* Each .photo-stack holds 1 visible photo + 1-2 ghost shadows behind */
+    .photo-stack {
+      break-inside: avoid;
+      display: inline-block;
+      width: 100%;
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    /* Ghost shadow cards behind each photo */
+    .photo-stack::before,
+    .photo-stack::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--photo-bg);
+      box-shadow: 2px 2px 8px var(--shadow);
+    }
+    .photo-stack::before { transform: rotate(var(--r1, -3.2deg)) translate(-2px, 3px); z-index: 1; }
+    .photo-stack::after  { transform: rotate(var(--r2,  2.1deg)) translate(3px, -2px); z-index: 2; }
+
+    /* The actual photo card */
+    .photo-card {
+      position: relative;
+      z-index: 3;
+      background: var(--photo-bg);
+      padding: 10px 10px 36px;
+      box-shadow: 3px 4px 14px var(--shadow);
+      transform: rotate(var(--r3, 0deg));
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: default;
+    }
+    .photo-stack:hover .photo-card {
+      transform: rotate(0deg) scale(1.015);
+      box-shadow: 6px 8px 24px var(--shadow);
+      z-index: 10;
+    }
+    .photo-stack:hover::before,
+    .photo-stack:hover::after { opacity: 0.6; }
+
+    .photo-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+    }
+
+    /* Tape strip at top */
+    .tape {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%) rotate(var(--tape-r, -1deg));
+      width: 52px;
+      height: 20px;
+      background: var(--tape);
+      border: 1px solid rgba(180,200,240,0.35);
+      z-index: 10;
+      backdrop-filter: blur(1px);
+    }
+
+    /* Caption area inside white border */
+    .photo-caption-area {
+      padding-top: 6px;
+      font-family: 'Caveat', cursive;
+      font-size: 1.05rem;
+      color: #2a2a2a;
+      line-height: 1.3;
+      min-height: 28px;
+      outline: none;
+      cursor: text;
+    }
+    .photo-caption-area:empty::before {
+      content: 'add a caption…';
+      color: #bbb;
+      pointer-events: none;
+    }
+
+    /* Per-photo meta row */
+    .photo-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .photo-tag {
+      display: inline-block;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      border: 1px solid currentColor;
+      padding: 1px 6px;
+      opacity: 0.6;
+      cursor: pointer;
+      color: #2a2a2a;
+    }
+    .photo-tag:hover { opacity: 1; }
+    .photo-delete {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: #aaa;
+      font-family: 'Caveat', cursive;
+      opacity: 0;
+      transition: opacity 0.15s;
+      padding: 0 2px;
+    }
+    .photo-card:hover .photo-delete { opacity: 1; }
+    .photo-delete:hover { color: #c00; }
+
+    /* ── SECTION HEADERS inside scrapbook ── */
+    .scrap-section-head {
+      break-inside: avoid;
+      display: inline-block;
+      width: 100%;
+      margin-bottom: 20px;
+      font-family: 'Special Elite', monospace;
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      color: var(--ink-faint);
+      border-bottom: 1px dashed var(--ink-faint);
+      padding-bottom: 4px;
+    }
+
+    /* ── TRAIN TAG FILTER BAR ── */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+      align-items: center;
+    }
+    .filter-label {
+      font-family: 'Special Elite', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: var(--ink-faint);
+      margin-right: 4px;
+    }
+    .filter-btn {
+      font-family: 'Special Elite', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      border: 1.5px solid var(--ink-faint);
+      background: none;
+      color: var(--ink-faint);
+      padding: 3px 10px;
+      cursor: pointer;
+      transition: background 0.1s, color 0.1s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+    .filter-btn[data-color] { border-color: attr(data-color); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--ink-faint);
+      border: 2px dashed var(--ink-faint);
+      opacity: 0.6;
+    }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 1.05rem; }
+
+    /* ── TAG MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 3000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--paper);
+      border: 2px solid var(--ink);
+      padding: 20px 24px;
+      max-width: 360px;
+      width: 90%;
+      font-family: 'Caveat', cursive;
+    }
+    .modal h3 {
+      font-family: 'Special Elite', monospace;
+      font-size: 1rem;
+      letter-spacing: 0.06em;
+      margin-bottom: 14px;
+    }
+    .tag-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 16px;
+    }
+    .tag-option {
+      font-family: 'Special Elite', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+      border: 1.5px solid currentColor;
+      padding: 3px 10px;
+      cursor: pointer;
+      background: transparent;
+      transition: background 0.1s, color 0.1s;
+    }
+    .tag-option.selected { background: var(--ink); color: var(--paper) !important; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-btn {
+      font-family: 'Special Elite', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      border: 1.5px solid var(--ink);
+      background: none;
+      color: var(--ink);
+      padding: 4px 14px;
+      cursor: pointer;
+    }
+    .modal-btn.primary { background: var(--ink); color: var(--paper); }
+
+    /* ── FOOTER ── */
+    .footer { border-top: 1px solid var(--ink-faint); padding-top: 12px; margin-top: 40px; font-size: 0.82rem; color: var(--ink-faint); text-align: center; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--paper-dark); }
+    ::-webkit-scrollbar-thumb { background: var(--ink-faint); }
+  </style>
+</head>
+<body>
+
+<button id="dark-toggle" onclick="toggleDark()">☽ dark</button>
+
+<!-- NAV -->
+<div class="nav-bar">
+  <a href="index.html">← Trip Overview</a>
+  <span class="nav-sep">/</span>
+  <a href="scrapbook.html" class="active">📷 Scrapbook</a>
+</div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="stamp-row">
+      <span class="stamp">SPRING BREAK 2026</span>
+      <span class="stamp blue">PHOTO ALBUM</span>
+    </div>
+    <h1>The Scrapbook</h1>
+    <p class="sub">drag in your photos · click to add captions · tag by train</p>
+  </div>
+
+  <!-- UPLOAD -->
+  <div class="upload-section">
+    <div class="section-label">/ add photos /</div>
+    <div class="upload-zone" id="upload-zone">
+      <input type="file" id="file-input" accept="image/*" multiple>
+      <span class="upload-icon">📷</span>
+      <p>drag photos here or click to browse</p>
+      <p class="upload-hint">JPG, PNG, HEIC — as many as you like</p>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar" id="filter-bar" style="display:none">
+    <span class="filter-label">filter by train:</span>
+    <button class="filter-btn active" data-filter="all">all</button>
+    <button class="filter-btn" data-filter="untagged" style="color:var(--ink-faint)">untagged</button>
+  </div>
+
+  <!-- SCRAPBOOK GRID -->
+  <div class="section-label" id="grid-label" style="display:none">/ photographs /</div>
+  <div id="empty-state" class="empty-state">
+    <div class="empty-icon">🚂</div>
+    <p>your photos will appear here</p>
+    <p style="font-size:0.85rem;margin-top:6px;opacity:0.7">upload above to get started</p>
+  </div>
+  <div class="scrapbook-grid" id="photo-grid"></div>
+
+</div>
+
+<!-- TAG MODAL -->
+<div class="modal-overlay" id="tag-modal">
+  <div class="modal">
+    <h3>tag this photo</h3>
+    <div class="tag-grid" id="tag-grid"></div>
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="closeTagModal()">cancel</button>
+      <button class="modal-btn primary" onclick="applyTag()">save</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>Spring Break 2026 · Photos saved in your browser · <a href="index.html" style="color:var(--ink-faint)">← back to trip overview</a></p>
+</div>
+
+<script>
+/* ─── DARK MODE ─────────────────────────────── */
+function toggleDark() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('dark-toggle').textContent = dark ? '☀ light' : '☽ dark';
+  localStorage.setItem('darkMode', dark ? '1' : '0');
+}
+if (localStorage.getItem('darkMode') === '1') {
+  document.body.classList.add('dark');
+  document.getElementById('dark-toggle').textContent = '☀ light';
+}
+
+/* ─── TRAIN TAGS ────────────────────────────── */
+const TRAIN_TAGS = [
+  { id:'ne164',    label:'#164 NE Regional',   color:'#8b2020' },
+  { id:'cardinal', label:'#51 Cardinal',        color:'#5c2278' },
+  { id:'cz1005',   label:'#1005 Cal. Zephyr',  color:'#b84e00' },
+  { id:'cs14',     label:'#14 Coast Starlight', color:'#1d6637' },
+  { id:'eb28',     label:'#28 Empire Builder',  color:'#1a3e70' },
+  { id:'lsl',      label:'#48/448 Lake Shore',  color:'#6e1818' },
+  { id:'ne99',     label:'#99 NE Regional',     color:'#8b2020' },
+  { id:'was',      label:'Washington DC',        color:'#666'    },
+  { id:'chi',      label:'Chicago',             color:'#666'    },
+  { id:'sac',      label:'Sacramento',          color:'#666'    },
+  { id:'pdx',      label:'Portland',            color:'#666'    },
+  { id:'bos',      label:'Boston',              color:'#666'    },
+  { id:'misc',     label:'Miscellaneous',       color:'#888'    },
+];
+
+const tagById = {};
+TRAIN_TAGS.forEach(t => tagById[t.id] = t);
+
+/* ─── ROTATION HELPERS ──────────────────────── */
+function rnd(min, max) { return (Math.random() * (max - min) + min).toFixed(2); }
+function pickRotations() {
+  // r3 = main card rotation, r1/r2 = ghost shadow rotations
+  const base = parseFloat(rnd(-3.5, 3.5));
+  return {
+    r1: (base + parseFloat(rnd(-2.5, -1))).toFixed(2),
+    r2: (base + parseFloat(rnd(1, 2.5))).toFixed(2),
+    r3: base.toFixed(2),
+    tape: rnd(-3, 3)
+  };
+}
+
+/* ─── STATE ─────────────────────────────────── */
+let photos = [];  // { id, src, caption, tagId, rotations }
+let currentFilter = 'all';
+let tagModalPhotoId = null;
+let tagModalSelectedId = null;
+
+/* ─── STORAGE ───────────────────────────────── */
+const STORE_KEY = 'scrapbook_photos_v1';
+
+function saveToStorage() {
+  // Store everything except raw src (too large for localStorage in many cases)
+  // We store src as-is (base64) — works for typical photo sizes
+  try {
+    const slim = photos.map(p => ({
+      id:p.id, src:p.src, caption:p.caption, tagId:p.tagId, rotations:p.rotations
+    }));
+    localStorage.setItem(STORE_KEY, JSON.stringify(slim));
+  } catch(e) {
+    // Storage quota exceeded — silently skip; photos still show in session
+    console.warn('Storage quota exceeded, photos not persisted.');
+  }
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) photos = JSON.parse(raw);
+  } catch(e) { photos = []; }
+}
+
+/* ─── RENDER ────────────────────────────────── */
+function render() {
+  const grid = document.getElementById('photo-grid');
+  const empty = document.getElementById('empty-state');
+  const label = document.getElementById('grid-label');
+  const filterBar = document.getElementById('filter-bar');
+  grid.innerHTML = '';
+
+  const visible = photos.filter(p => {
+    if (currentFilter === 'all') return true;
+    if (currentFilter === 'untagged') return !p.tagId;
+    return p.tagId === currentFilter;
+  });
+
+  empty.style.display = photos.length === 0 ? 'block' : 'none';
+  label.style.display  = photos.length > 0   ? 'block' : 'none';
+  filterBar.style.display = photos.length > 0 ? 'flex' : 'none';
+
+  if (visible.length === 0 && photos.length > 0) {
+    const msg = document.createElement('div');
+    msg.className = 'empty-state';
+    msg.style.cssText = 'display:block;opacity:0.5;';
+    msg.innerHTML = '<p>no photos match this filter</p>';
+    grid.appendChild(msg);
+    return;
+  }
+
+  visible.forEach(p => {
+    const r = p.rotations;
+    const tag = p.tagId ? tagById[p.tagId] : null;
+
+    const stack = document.createElement('div');
+    stack.className = 'photo-stack';
+    stack.style.setProperty('--r1', r.r1 + 'deg');
+    stack.style.setProperty('--r2', r.r2 + 'deg');
+    stack.dataset.id = p.id;
+
+    stack.innerHTML = `
+      <div class="tape" style="--tape-r:${r.tape}deg"></div>
+      <div class="photo-card" style="--r3:${r.r3}deg">
+        <img src="${p.src}" alt="${p.caption || ''}">
+        <div
+          class="photo-caption-area"
+          contenteditable="true"
+          data-id="${p.id}"
+          placeholder="add a caption…"
+        >${p.caption || ''}</div>
+        <div class="photo-meta">
+          <button class="photo-tag" data-id="${p.id}"
+            style="${tag ? `color:${tag.color};border-color:${tag.color};opacity:0.85;` : ''}"
+          >${tag ? tag.label : '+ tag'}</button>
+          <button class="photo-delete" data-id="${p.id}" title="remove photo">✕ remove</button>
+        </div>
+      </div>`;
+
+    grid.appendChild(stack);
+  });
+
+  // Caption edits
+  grid.querySelectorAll('.photo-caption-area').forEach(el => {
+    el.addEventListener('input', () => {
+      const photo = photos.find(p => p.id === el.dataset.id);
+      if (photo) { photo.caption = el.innerText.trim(); saveToStorage(); }
+    });
+  });
+
+  // Tag buttons
+  grid.querySelectorAll('.photo-tag').forEach(btn => {
+    btn.addEventListener('click', () => openTagModal(btn.dataset.id));
+  });
+
+  // Delete buttons
+  grid.querySelectorAll('.photo-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (confirm('Remove this photo from the scrapbook?')) {
+        photos = photos.filter(p => p.id !== btn.dataset.id);
+        saveToStorage();
+        render();
+      }
+    });
+  });
+}
+
+/* ─── FILTER BAR ────────────────────────────── */
+function rebuildFilterBar() {
+  const bar = document.getElementById('filter-bar');
+  // Keep "all" and "untagged" buttons, then add one per used tag
+  const usedTagIds = [...new Set(photos.filter(p=>p.tagId).map(p=>p.tagId))];
+  const existing = bar.querySelectorAll('[data-filter]');
+
+  // Remove old train-specific filter buttons
+  existing.forEach(btn => {
+    if (btn.dataset.filter !== 'all' && btn.dataset.filter !== 'untagged') btn.remove();
+  });
+
+  usedTagIds.forEach(tid => {
+    const tag = tagById[tid];
+    if (!tag) return;
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.dataset.filter = tid;
+    btn.textContent = tag.label;
+    btn.style.cssText = `color:${tag.color};border-color:${tag.color};`;
+    btn.addEventListener('click', () => setFilter(tid, btn));
+    bar.appendChild(btn);
+  });
+
+  // Wire up all / untagged buttons
+  bar.querySelectorAll('[data-filter="all"], [data-filter="untagged"]').forEach(btn => {
+    btn.onclick = () => setFilter(btn.dataset.filter, btn);
+  });
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+/* ─── TAG MODAL ─────────────────────────────── */
+function openTagModal(photoId) {
+  tagModalPhotoId = photoId;
+  const photo = photos.find(p => p.id === photoId);
+  tagModalSelectedId = photo ? photo.tagId : null;
+
+  const grid = document.getElementById('tag-grid');
+  grid.innerHTML = '';
+  TRAIN_TAGS.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'tag-option' + (tagModalSelectedId === t.id ? ' selected' : '');
+    btn.textContent = t.label;
+    btn.style.color = t.color;
+    btn.style.borderColor = t.color;
+    btn.addEventListener('click', () => {
+      tagModalSelectedId = tagModalSelectedId === t.id ? null : t.id;
+      grid.querySelectorAll('.tag-option').forEach(b => b.classList.remove('selected'));
+      if (tagModalSelectedId) btn.classList.add('selected');
+    });
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('tag-modal').classList.add('open');
+}
+
+function closeTagModal() {
+  document.getElementById('tag-modal').classList.remove('open');
+  tagModalPhotoId = null;
+}
+
+function applyTag() {
+  const photo = photos.find(p => p.id === tagModalPhotoId);
+  if (photo) {
+    photo.tagId = tagModalSelectedId;
+    saveToStorage();
+    rebuildFilterBar();
+    render();
+  }
+  closeTagModal();
+}
+
+// Close modal on overlay click
+document.getElementById('tag-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeTagModal();
+});
+
+/* ─── FILE HANDLING ─────────────────────────── */
+function handleFiles(files) {
+  const fileArr = Array.from(files).filter(f => f.type.startsWith('image/'));
+  if (!fileArr.length) return;
+
+  let loaded = 0;
+  fileArr.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const r = pickRotations();
+      photos.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+        src: e.target.result,
+        caption: '',
+        tagId: null,
+        rotations: r
+      });
+      loaded++;
+      if (loaded === fileArr.length) {
+        saveToStorage();
+        rebuildFilterBar();
+        render();
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// File input click
+document.getElementById('file-input').addEventListener('change', function() {
+  handleFiles(this.files);
+  this.value = '';
+});
+
+// Drag & drop
+const zone = document.getElementById('upload-zone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault();
+  zone.classList.remove('drag-over');
+  handleFiles(e.dataTransfer.files);
+});
+
+// Drag & drop anywhere on page
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  if (e.target.closest('#upload-zone')) return; // handled above
+  handleFiles(e.dataTransfer.files);
+});
+
+/* ─── INIT ──────────────────────────────────── */
+loadFromStorage();
+rebuildFilterBar();
+render();
+</script>
+</body>
+</html>
