@@ -372,12 +372,13 @@
   <div class="layovers-section">
     <div class="section-label">/ layovers /</div>
     <div class="layovers-wrap">
-      <span class="layover-badge" style="--r:-1.5deg">4 hrs · Washington DC</span>
-      <span class="layover-badge" style="--r:0.8deg">3 hrs · Chicago (outbound)</span>
-      <span class="layover-badge" style="--r:-0.5deg">7 hrs · Sacramento</span>
-      <span class="layover-badge" style="--r:1.2deg">1 hr · Portland</span>
-      <span class="layover-badge" style="--r:-0.8deg">4½ hrs · Chicago (return)</span>
-      <span class="layover-badge" style="--r:1.5deg">12 hrs · Boston</span>
+      <span class="layover-badge" style="--r:-1.5deg">3 hr 21 min · Washington DC</span>
+      <span class="layover-badge" style="--r:0.8deg">3 hr 35 min · Chicago (outbound)</span>
+      <span class="layover-badge" style="--r:-0.5deg">7 hr 44 min · Sacramento</span>
+      <span class="layover-badge" style="--r:1.2deg">1 hr 5 min · Portland</span>
+      <span class="layover-badge" style="--r:-0.8deg">4 hr 45 min · Chicago (return)</span>
+      <span class="layover-badge" style="--r:1.5deg">34 min · Albany (train splits)</span>
+      <span class="layover-badge" style="--r:0.4deg">~12 hrs · Boston</span>
     </div>
   </div>
 
@@ -403,119 +404,189 @@ if (localStorage.getItem('darkMode') === '1') {
 
 /* ─── TRAIN DATA ──────────────────────────────── */
 const TRAINS = [
-  { id:'ne164',    num:164,  name:'Northeast Regional',
-    from:'WBG', fromFull:'Williamsburg, VA',  to:'WAS', toFull:'Washington, DC',
-    date:'Mar 6',     color:'#8b2020', miles:113,  hours:2,
-    tStart:0.00, tEnd:0.22,
-    notes:'Short hop up the NE Corridor to Washington Union Station.',
-    layoverAfter:null, meals:'', highlight:'Northeast Corridor' },
-  { id:'cardinal', num:51,   name:'Cardinal',
-    from:'WAS', fromFull:'Washington, DC',    to:'CHI', toFull:'Chicago, IL',
-    date:'Mar 6–7',   color:'#5c2278', miles:1146, hours:17,
-    tStart:0.35, tEnd:1.55,
+  { id:'ne164',
+    num:164,
+    name:'Northeast Regional',
+    from:'WBG', fromFull:'Williamsburg, VA',
+    to:'WAS',   toFull:'Washington, DC',
+    date:'Mar 6',
+    dep:'4:24 AM',  arr:'8:18 AM',
+    color:'#8b2020', miles:113,  hours:4,
+    tStart:0.00, tEnd:0.35,
+    notes:'Early morning run up the NE Corridor to Washington Union Station.',
+    layoverAfter:null,
+    meals:'1',
+    highlight:'Northeast Corridor' },
+
+  { id:'cardinal',
+    num:51,
+    name:'Cardinal',
+    from:'WAS', fromFull:'Washington, DC',
+    to:'CHI',   toFull:'Chicago, IL',
+    date:'Mar 6–7',
+    dep:'11:39 AM', arr:'10:25 AM (+1)',
+    color:'#5c2278', miles:1146, hours:23,
+    tStart:0.50, tEnd:1.45,
     notes:'Through the West Virginia mountains — one of Amtrak\'s most scenic routes. Passes New River Gorge National Park.',
-    layoverAfter:'3 hrs in Chicago', meals:'D · B', highlight:'West Virginia mountains' },
-  { id:'cz1005',   num:1005, name:'California Zephyr',
-    from:'CHI', fromFull:'Chicago, IL',       to:'SAC', toFull:'Sacramento, CA',
-    date:'Mar 7–9',   color:'#b84e00', miles:1788, hours:51,
-    tStart:1.72, tEnd:3.42,
+    layoverAfter:'3 hr 35 min in Chicago',
+    meals:'3',
+    highlight:'West Virginia mountains' },
+
+  { id:'cz1005',
+    num:1005,
+    name:'California Zephyr',
+    from:'CHI', fromFull:'Chicago, IL',
+    to:'SAC',   toFull:'Sacramento, CA',
+    date:'Mar 7–9',
+    dep:'2:00 PM',  arr:'4:05 PM (+2)',
+    color:'#b84e00', miles:1788, hours:50,
+    tStart:1.58, tEnd:3.68,
     notes:'The crown jewel of Amtrak — Moffat Tunnel under the Rockies, Glenwood Canyon, Utah desert, Sierra Nevada. Two nights on board.',
-    layoverAfter:'7 hrs in Sacramento', meals:'D · B · L · D · B', highlight:'Rockies + Glenwood Canyon (day) · Sierra Nevada (morning)' },
-  { id:'cs14',     num:14,   name:'Coast Starlight',
-    from:'SAC', fromFull:'Sacramento, CA',    to:'PDX', toFull:'Portland, OR',
-    date:'Mar 9–10',  color:'#1d6637', miles:463, hours:16,
-    tStart:3.60, tEnd:4.28,
+    layoverAfter:'7 hr 44 min in Sacramento',
+    meals:'6',
+    highlight:'Rockies + Glenwood Canyon (day) · Sierra Nevada (morning)' },
+
+  { id:'cs14',
+    num:14,
+    name:'Coast Starlight',
+    from:'SAC', fromFull:'Sacramento, CA',
+    to:'PDX',   toFull:'Portland, OR',
+    date:'Mar 9–10',
+    dep:'11:49 PM', arr:'3:40 PM (+1)',
+    color:'#1d6637', miles:463,  hours:16,
+    tStart:3.82, tEnd:4.66,
     notes:'Sacramento Valley, past Mt. Shasta in the dark, through the Cascades to Portland.',
-    layoverAfter:'1 hr in Portland', meals:'D · B', highlight:'Mt. Shasta (night) · Cascades' },
-  { id:'eb28',     num:28,   name:'Empire Builder',
-    from:'PDX', fromFull:'Portland, OR',      to:'CHI', toFull:'Chicago, IL',
-    date:'Mar 10–12', color:'#1a3e70', miles:2257, hours:46,
-    tStart:4.42, tEnd:6.38,
+    layoverAfter:'1 hr 5 min in Portland',
+    meals:'3',
+    highlight:'Mt. Shasta (night) · Cascades' },
+
+  { id:'eb28',
+    num:28,
+    name:'Empire Builder',
+    from:'PDX', fromFull:'Portland, OR',
+    to:'CHI',   toFull:'Chicago, IL',
+    date:'Mar 10–12',
+    dep:'4:45 PM',  arr:'4:45 PM (+2)',
+    color:'#1a3e70', miles:2257, hours:48,
+    tStart:4.70, tEnd:6.70,
     notes:'Columbia River Gorge in the afternoon, Glacier Country at dawn, then two days across the Northern Plains.',
-    layoverAfter:'4½ hrs in Chicago', meals:'D · B · L · D · B', highlight:'Columbia Gorge (day) · Glacier NP area (day)' },
-  { id:'lsl48',    num:48,   name:'Lake Shore Limited',
-    from:'CHI', fromFull:'Chicago, IL',       to:'ALB', toFull:'Albany, NY',
-    date:'Mar 12–13', color:'#6e1818', miles:1018, hours:20,
-    tStart:6.56, tEnd:7.42,
-    notes:'Along the Great Lakes and Lake Erie overnight. Train splits at Albany for the Boston section.',
-    layoverAfter:null, meals:'D · B', highlight:'Great Lakes · Lake Erie shoreline (night)' },
-  { id:'lsl448',   num:448,  name:'Lake Shore Limited',
-    from:'ALB', fromFull:'Albany, NY',        to:'BOS', toFull:'Boston, MA',
-    date:'Mar 13',    color:'#6e1818', miles:229, hours:3,
-    tStart:7.50, tEnd:7.85,
+    layoverAfter:'4 hr 45 min in Chicago',
+    meals:'6',
+    highlight:'Columbia Gorge (day) · Glacier NP area (day)' },
+
+  { id:'lsl48',
+    num:48,
+    name:'Lake Shore Limited',
+    from:'CHI', fromFull:'Chicago, IL',
+    to:'ALB',   toFull:'Albany-Rensselaer, NY',
+    date:'Mar 12–13',
+    dep:'9:30 PM',  arr:'2:53 PM (+1)',
+    color:'#6e1818', miles:1018, hours:17,
+    tStart:6.90, tEnd:7.62,
+    notes:'Along the Great Lakes and Lake Erie overnight. Train splits at Albany-Rensselaer for the Boston section.',
+    layoverAfter:'34 min in Albany',
+    meals:'3',
+    highlight:'Great Lakes · Lake Erie shoreline (night)' },
+
+  { id:'lsl448',
+    num:448,
+    name:'Lake Shore Limited',
+    from:'ALB', fromFull:'Albany-Rensselaer, NY',
+    to:'BOS',   toFull:'Boston, MA',
+    date:'Mar 13',
+    dep:'3:27 PM',  arr:'8:32 PM',
+    color:'#6e1818', miles:229,  hours:5,
+    tStart:7.64, tEnd:7.88,
     notes:'Boston section splits from Albany, east through the Berkshires into South Station.',
-    layoverAfter:'12 hrs in Boston', meals:'L', highlight:'Berkshires' },
-  { id:'ne99',     num:99,   name:'Northeast Regional',
-    from:'BOS', fromFull:'Boston, MA',        to:'WBG', toFull:'Williamsburg, VA',
-    date:'Mar 14',    color:'#8b2020', miles:null, hours:9,
+    layoverAfter:'~12 hrs in Boston',
+    meals:'1',
+    highlight:'Berkshires' },
+
+  { id:'ne99',
+    num:99,
+    name:'Northeast Regional',
+    from:'BOS', fromFull:'Boston, MA',
+    to:'WBG',   toFull:'Williamsburg, VA',
+    date:'Mar 14',
+    dep:'8:40 AM',  arr:'8:50 PM',
+    color:'#8b2020', miles:null, hours:12,
     tStart:8.00, tEnd:8.95,
     notes:'Providence, New Haven, over the Hell Gate Bridge into NYC, through Philadelphia, Baltimore, DC, and home.',
-    layoverAfter:null, meals:'B · L', highlight:'Hell Gate Bridge NYC (day) · NE Corridor home' }
+    layoverAfter:null,
+    meals:'3',
+    highlight:'Hell Gate Bridge NYC (day) · NE Corridor home' }
 ];
 
 /* ─── TIMETABLE DATA ──────────────────────────── */
 // type: 'depart' | 'arrive' | 'layover' | 'meal'
 // trainId: matches TRAINS id, null for layovers/meals
-// badge: short text for status column
-// inLayover: true if meal is during a layover (not on train)
 const TT_EVENTS = [
-  // ── MAR 6 ─────────────────────────────────────────────────────────────────
-  { date:'Friday, March 6',  time:'7:35 AM',  type:'depart',  station:'Williamsburg, VA (WBG)',      badge:'DEP', trainId:'ne164',    note:'' },
-  { date:'Friday, March 6',  time:'9:00 AM',  type:'meal',    station:'☕ Breakfast on train',         badge:'B',   trainId:'ne164',    note:'on board' },
-  { date:'Friday, March 6',  time:'9:58 AM',  type:'arrive',  station:'Washington, DC (WAS)',         badge:'ARR', trainId:'ne164',    note:'' },
-  { date:'Friday, March 6',  time:'9:58 AM',  type:'layover', station:'Layover — Washington Union Station (4 hrs)', badge:'—', trainId:null, note:'' },
-  { date:'Friday, March 6',  time:'1:00 PM',  type:'meal',    station:'🥪 Lunch at Union Station',    badge:'L',   trainId:null,       note:'in station' },
-  { date:'Friday, March 6',  time:'2:05 PM',  type:'depart',  station:'Washington, DC (WAS)',         badge:'DEP', trainId:'cardinal', note:'' },
-  { date:'Friday, March 6',  time:'6:00 PM',  type:'meal',    station:'🍽 Dinner on train',           badge:'D',   trainId:'cardinal', note:'on board' },
-  // ── MAR 7 ─────────────────────────────────────────────────────────────────
-  { date:'Saturday, March 7',time:'9:00 AM',  type:'meal',    station:'☕ Breakfast on train',         badge:'B',   trainId:'cardinal', note:'on board — entering Illinois' },
-  { date:'Saturday, March 7',time:'11:45 AM', type:'arrive',  station:'Chicago, IL (CHI)',             badge:'ARR', trainId:'cardinal', note:'' },
-  { date:'Saturday, March 7',time:'11:45 AM', type:'layover', station:'Layover — Chicago Union Station (3 hrs)', badge:'—', trainId:null, note:'' },
-  { date:'Saturday, March 7',time:'1:00 PM',  type:'meal',    station:'🥪 Lunch in Chicago',           badge:'L',   trainId:null,       note:'in station' },
-  { date:'Saturday, March 7',time:'2:00 PM',  type:'depart',  station:'Chicago, IL (CHI)',             badge:'DEP', trainId:'cz1005',   note:'' },
-  { date:'Saturday, March 7',time:'6:00 PM',  type:'meal',    station:'🍽 Dinner on train',            badge:'D',   trainId:'cz1005',   note:'on board — crossing Iowa' },
-  // ── MAR 8 ─────────────────────────────────────────────────────────────────
-  { date:'Sunday, March 8',  time:'9:00 AM',  type:'meal',    station:'☕ Breakfast on train',         badge:'B',   trainId:'cz1005',   note:'on board — approaching Rockies' },
-  { date:'Sunday, March 8',  time:'1:00 PM',  type:'meal',    station:'🥪 Lunch on train',             badge:'L',   trainId:'cz1005',   note:'on board — Glenwood Canyon, CO' },
-  { date:'Sunday, March 8',  time:'6:00 PM',  type:'meal',    station:'🍽 Dinner on train',            badge:'D',   trainId:'cz1005',   note:'on board — Utah desert' },
-  // ── MAR 9 ─────────────────────────────────────────────────────────────────
-  { date:'Monday, March 9',  time:'9:00 AM',  type:'meal',    station:'☕ Breakfast on train',         badge:'B',   trainId:'cz1005',   note:'on board — Nevada' },
-  { date:'Monday, March 9',  time:'1:00 PM',  type:'meal',    station:'🥪 Lunch on train',             badge:'L',   trainId:'cz1005',   note:'on board — Sierra Nevada, CA' },
-  { date:'Monday, March 9',  time:'4:10 PM',  type:'arrive',  station:'Sacramento, CA (SAC)',          badge:'ARR', trainId:'cz1005',   note:'' },
-  { date:'Monday, March 9',  time:'4:10 PM',  type:'layover', station:'Layover — Sacramento (7 hrs)', badge:'—',   trainId:null,       note:'' },
-  { date:'Monday, March 9',  time:'6:00 PM',  type:'meal',    station:'🍽 Dinner in Sacramento',       badge:'D',   trainId:null,       note:'in city' },
-  { date:'Monday, March 9',  time:'11:10 PM', type:'depart',  station:'Sacramento, CA (SAC)',          badge:'DEP', trainId:'cs14',     note:'' },
-  // ── MAR 10 ────────────────────────────────────────────────────────────────
-  { date:'Tuesday, March 10',time:'9:00 AM',  type:'meal',    station:'☕ Breakfast on train',         badge:'B',   trainId:'cs14',     note:'on board — Oregon Cascades' },
-  { date:'Tuesday, March 10',time:'1:00 PM',  type:'meal',    station:'🥪 Lunch on train',             badge:'L',   trainId:'cs14',     note:'on board — Willamette Valley' },
-  { date:'Tuesday, March 10',time:'2:45 PM',  type:'arrive',  station:'Portland, OR (PDX)',            badge:'ARR', trainId:'cs14',     note:'' },
-  { date:'Tuesday, March 10',time:'2:45 PM',  type:'layover', station:'Layover — Portland Union Station (1 hr)', badge:'—', trainId:null, note:'' },
-  { date:'Tuesday, March 10',time:'4:10 PM',  type:'depart',  station:'Portland, OR (PDX)',            badge:'DEP', trainId:'eb28',     note:'' },
-  { date:'Tuesday, March 10',time:'6:00 PM',  type:'meal',    station:'🍽 Dinner on train',            badge:'D',   trainId:'eb28',     note:'on board — Columbia River Gorge' },
-  // ── MAR 11 ────────────────────────────────────────────────────────────────
-  { date:'Wednesday, March 11',time:'9:00 AM',type:'meal',    station:'☕ Breakfast on train',         badge:'B',   trainId:'eb28',     note:'on board — Glacier NP area, MT' },
-  { date:'Wednesday, March 11',time:'1:00 PM',type:'meal',    station:'🥪 Lunch on train',             badge:'L',   trainId:'eb28',     note:'on board — Montana Hi-Line' },
-  { date:'Wednesday, March 11',time:'6:00 PM',type:'meal',    station:'🍽 Dinner on train',            badge:'D',   trainId:'eb28',     note:'on board — North Dakota' },
-  // ── MAR 12 ────────────────────────────────────────────────────────────────
-  { date:'Thursday, March 12',time:'9:00 AM', type:'meal',    station:'☕ Breakfast on train',         badge:'B',   trainId:'eb28',     note:'on board — Minnesota / Wisconsin' },
-  { date:'Thursday, March 12',time:'1:00 PM', type:'meal',    station:'🥪 Lunch on train',             badge:'L',   trainId:'eb28',     note:'on board — Wisconsin' },
-  { date:'Thursday, March 12',time:'3:15 PM', type:'arrive',  station:'Chicago, IL (CHI)',             badge:'ARR', trainId:'eb28',     note:'' },
-  { date:'Thursday, March 12',time:'3:15 PM', type:'layover', station:'Layover — Chicago Union Station (4½ hrs)', badge:'—', trainId:null, note:'' },
-  { date:'Thursday, March 12',time:'6:00 PM', type:'meal',    station:'🍽 Dinner in Chicago',          badge:'D',   trainId:null,       note:'in city' },
-  { date:'Thursday, March 12',time:'9:30 PM', type:'depart',  station:'Chicago, IL (CHI)',             badge:'DEP', trainId:'lsl48',    note:'' },
-  // ── MAR 13 ────────────────────────────────────────────────────────────────
-  { date:'Friday, March 13',  time:'6:15 AM', type:'arrive',  station:'Albany, NY (ALB)',              badge:'ARR', trainId:'lsl48',    note:'Train splits — Boston section' },
-  { date:'Friday, March 13',  time:'6:35 AM', type:'depart',  station:'Albany, NY (ALB)',              badge:'DEP', trainId:'lsl448',   note:'Boston section departs' },
-  { date:'Friday, March 13',  time:'9:00 AM', type:'meal',    station:'☕ Breakfast on train',         badge:'B',   trainId:'lsl448',   note:'on board — Berkshires, MA' },
-  { date:'Friday, March 13',  time:'9:45 AM', type:'arrive',  station:'Boston, MA (BOS)',              badge:'ARR', trainId:'lsl448',   note:'' },
-  { date:'Friday, March 13',  time:'9:45 AM', type:'layover', station:'Layover — Boston South Station (12 hrs)', badge:'—', trainId:null, note:'' },
-  { date:'Friday, March 13',  time:'1:00 PM', type:'meal',    station:'🥪 Lunch in Boston',            badge:'L',   trainId:null,       note:'in city' },
-  { date:'Friday, March 13',  time:'6:00 PM', type:'meal',    station:'🍽 Dinner in Boston',           badge:'D',   trainId:null,       note:'in city' },
-  // ── MAR 14 ────────────────────────────────────────────────────────────────
-  { date:'Saturday, March 14',time:'6:05 AM', type:'depart',  station:'Boston, MA (BOS)',              badge:'DEP', trainId:'ne99',     note:'' },
-  { date:'Saturday, March 14',time:'9:00 AM', type:'meal',    station:'☕ Breakfast on train',         badge:'B',   trainId:'ne99',     note:'on board — passing NYC area' },
-  { date:'Saturday, March 14',time:'1:00 PM', type:'meal',    station:'🥪 Lunch on train',             badge:'L',   trainId:'ne99',     note:'on board — Philadelphia / Baltimore' },
-  { date:'Saturday, March 14',time:'4:15 PM', type:'arrive',  station:'Williamsburg, VA (WBG)',        badge:'ARR', trainId:'ne99',     note:'Home ✓' },
+
+  // ── FRI MAR 6 ─────────────────────────────────────────────────────────────
+  { date:'Friday, March 6',    time:'4:24 AM',  type:'depart',  station:'Williamsburg, VA (WBG)',                   badge:'DEP', trainId:'ne164'    },
+  { date:'Friday, March 6',    time:'8:18 AM',  type:'arrive',  station:'Washington, DC — Union Station (WAS)',     badge:'ARR', trainId:'ne164'    },
+  { date:'Friday, March 6',    time:'8:18 AM',  type:'layover', station:'Layover — Washington Union Station (3 hr 21 min)', badge:'—', trainId:null },
+  { date:'Friday, March 6',    time:'9:00 AM',  type:'meal',    station:'☕ Breakfast at Union Station',             badge:'B',   trainId:null       },
+  { date:'Friday, March 6',    time:'11:39 AM', type:'depart',  station:'Washington, DC — Union Station (WAS)',     badge:'DEP', trainId:'cardinal' },
+  { date:'Friday, March 6',    time:'1:00 PM',  type:'meal',    station:'🥪 Lunch on train',                        badge:'L',   trainId:'cardinal' },
+  { date:'Friday, March 6',    time:'6:00 PM',  type:'meal',    station:'🍽 Dinner on train',                       badge:'D',   trainId:'cardinal' },
+
+  // ── SAT MAR 7 ─────────────────────────────────────────────────────────────
+  { date:'Saturday, March 7',  time:'9:00 AM',  type:'meal',    station:'☕ Breakfast on train',                    badge:'B',   trainId:'cardinal' },
+  { date:'Saturday, March 7',  time:'10:25 AM', type:'arrive',  station:'Chicago, IL — Union Station (CHI)',        badge:'ARR', trainId:'cardinal' },
+  { date:'Saturday, March 7',  time:'10:25 AM', type:'layover', station:'Layover — Chicago Union Station (3 hr 35 min)', badge:'—', trainId:null },
+  { date:'Saturday, March 7',  time:'1:00 PM',  type:'meal',    station:'🥪 Lunch in Chicago',                      badge:'L',   trainId:null       },
+  { date:'Saturday, March 7',  time:'2:00 PM',  type:'depart',  station:'Chicago, IL — Union Station (CHI)',        badge:'DEP', trainId:'cz1005'   },
+  { date:'Saturday, March 7',  time:'6:00 PM',  type:'meal',    station:'🍽 Dinner on train',                       badge:'D',   trainId:'cz1005'   },
+
+  // ── SUN MAR 8 ─────────────────────────────────────────────────────────────
+  { date:'Sunday, March 8',    time:'9:00 AM',  type:'meal',    station:'☕ Breakfast on train',                    badge:'B',   trainId:'cz1005'   },
+  { date:'Sunday, March 8',    time:'1:00 PM',  type:'meal',    station:'🥪 Lunch on train',                        badge:'L',   trainId:'cz1005'   },
+  { date:'Sunday, March 8',    time:'6:00 PM',  type:'meal',    station:'🍽 Dinner on train',                       badge:'D',   trainId:'cz1005'   },
+
+  // ── MON MAR 9 ─────────────────────────────────────────────────────────────
+  { date:'Monday, March 9',    time:'9:00 AM',  type:'meal',    station:'☕ Breakfast on train',                    badge:'B',   trainId:'cz1005'   },
+  { date:'Monday, March 9',    time:'1:00 PM',  type:'meal',    station:'🥪 Lunch on train',                        badge:'L',   trainId:'cz1005'   },
+  { date:'Monday, March 9',    time:'4:05 PM',  type:'arrive',  station:'Sacramento, CA (SAC)',                     badge:'ARR', trainId:'cz1005'   },
+  { date:'Monday, March 9',    time:'4:05 PM',  type:'layover', station:'Layover — Sacramento (7 hr 44 min)',       badge:'—',   trainId:null       },
+  { date:'Monday, March 9',    time:'6:00 PM',  type:'meal',    station:'🍽 Dinner in Sacramento',                  badge:'D',   trainId:null       },
+  { date:'Monday, March 9',    time:'11:49 PM', type:'depart',  station:'Sacramento, CA (SAC)',                     badge:'DEP', trainId:'cs14'     },
+
+  // ── TUE MAR 10 ────────────────────────────────────────────────────────────
+  { date:'Tuesday, March 10',  time:'9:00 AM',  type:'meal',    station:'☕ Breakfast on train',                    badge:'B',   trainId:'cs14'     },
+  { date:'Tuesday, March 10',  time:'1:00 PM',  type:'meal',    station:'🥪 Lunch on train',                        badge:'L',   trainId:'cs14'     },
+  { date:'Tuesday, March 10',  time:'3:40 PM',  type:'arrive',  station:'Portland, OR — Union Station (PDX)',       badge:'ARR', trainId:'cs14'     },
+  { date:'Tuesday, March 10',  time:'3:40 PM',  type:'layover', station:'Layover — Portland Union Station (1 hr 5 min)', badge:'—', trainId:null  },
+  { date:'Tuesday, March 10',  time:'4:45 PM',  type:'depart',  station:'Portland, OR — Union Station (PDX)',       badge:'DEP', trainId:'eb28'     },
+  { date:'Tuesday, March 10',  time:'6:00 PM',  type:'meal',    station:'🍽 Dinner on train',                       badge:'D',   trainId:'eb28'     },
+
+  // ── WED MAR 11 ────────────────────────────────────────────────────────────
+  { date:'Wednesday, March 11',time:'9:00 AM',  type:'meal',    station:'☕ Breakfast on train',                    badge:'B',   trainId:'eb28'     },
+  { date:'Wednesday, March 11',time:'1:00 PM',  type:'meal',    station:'🥪 Lunch on train',                        badge:'L',   trainId:'eb28'     },
+  { date:'Wednesday, March 11',time:'6:00 PM',  type:'meal',    station:'🍽 Dinner on train',                       badge:'D',   trainId:'eb28'     },
+
+  // ── THU MAR 12 ────────────────────────────────────────────────────────────
+  { date:'Thursday, March 12', time:'9:00 AM',  type:'meal',    station:'☕ Breakfast on train',                    badge:'B',   trainId:'eb28'     },
+  { date:'Thursday, March 12', time:'1:00 PM',  type:'meal',    station:'🥪 Lunch on train',                        badge:'L',   trainId:'eb28'     },
+  { date:'Thursday, March 12', time:'4:45 PM',  type:'arrive',  station:'Chicago, IL — Union Station (CHI)',        badge:'ARR', trainId:'eb28'     },
+  { date:'Thursday, March 12', time:'4:45 PM',  type:'layover', station:'Layover — Chicago Union Station (4 hr 45 min)', badge:'—', trainId:null  },
+  { date:'Thursday, March 12', time:'6:00 PM',  type:'meal',    station:'🍽 Dinner in Chicago',                     badge:'D',   trainId:null       },
+  { date:'Thursday, March 12', time:'9:30 PM',  type:'depart',  station:'Chicago, IL — Union Station (CHI)',        badge:'DEP', trainId:'lsl48'    },
+
+  // ── FRI MAR 13 ────────────────────────────────────────────────────────────
+  { date:'Friday, March 13',   time:'2:53 PM',  type:'arrive',  station:'Albany-Rensselaer, NY (ALB)',              badge:'ARR', trainId:'lsl48'    },
+  { date:'Friday, March 13',   time:'2:53 PM',  type:'layover', station:'Layover — Albany-Rensselaer (34 min) · train splits', badge:'—', trainId:null },
+  { date:'Friday, March 13',   time:'3:27 PM',  type:'depart',  station:'Albany-Rensselaer, NY (ALB)',              badge:'DEP', trainId:'lsl448'   },
+  { date:'Friday, March 13',   time:'6:00 PM',  type:'meal',    station:'🍽 Dinner on train',                       badge:'D',   trainId:'lsl448'   },
+  { date:'Friday, March 13',   time:'8:32 PM',  type:'arrive',  station:'Boston, MA — South Station (BOS)',         badge:'ARR', trainId:'lsl448'   },
+  { date:'Friday, March 13',   time:'8:32 PM',  type:'layover', station:'Layover — Boston (~12 hrs)',               badge:'—',   trainId:null       },
+
+  // ── SAT MAR 14 ────────────────────────────────────────────────────────────
+  { date:'Saturday, March 14', time:'8:40 AM',  type:'depart',  station:'Boston, MA — South Station (BOS)',         badge:'DEP', trainId:'ne99'     },
+  { date:'Saturday, March 14', time:'9:00 AM',  type:'meal',    station:'☕ Breakfast on train',                    badge:'B',   trainId:'ne99'     },
+  { date:'Saturday, March 14', time:'1:00 PM',  type:'meal',    station:'🥪 Lunch on train',                        badge:'L',   trainId:'ne99'     },
+  { date:'Saturday, March 14', time:'8:50 PM',  type:'arrive',  station:'Williamsburg, VA (WBG) ✓',                badge:'ARR', trainId:'ne99'     },
+
 ];
 
 /* ─── BUILD TIMETABLE ─────────────────────────── */
@@ -662,16 +733,19 @@ TRAINS.forEach(t => {
 function openTrain(t) {
   document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('active'));
   const mTxt = t.miles ? `${t.miles.toLocaleString()} mi` : 'NE Corridor';
+  const mealsTxt = t.meals && t.meals !== '0' ? `${t.meals} meal${t.meals==='1'?'':'s'}` : '—';
   document.getElementById('panel-content').innerHTML = `
     <div class="panel-title" style="border-left-color:${t.color}">#${t.num} ${t.name}</div>
     <div class="panel-grid">
       <div class="panel-item"><span class="label">From</span>${t.fromFull}</div>
       <div class="panel-item"><span class="label">To</span>${t.toFull}</div>
+      <div class="panel-item"><span class="label">Departs</span>${t.dep}</div>
+      <div class="panel-item"><span class="label">Arrives</span>${t.arr}</div>
       <div class="panel-item"><span class="label">Date</span>${t.date}</div>
       <div class="panel-item"><span class="label">Distance</span>${mTxt}</div>
       <div class="panel-item"><span class="label">Duration</span>~${t.hours}h</div>
+      <div class="panel-item"><span class="label">Meals on board</span>${mealsTxt}</div>
       ${t.layoverAfter?`<div class="panel-item"><span class="label">Layover after</span>${t.layoverAfter}</div>`:''}
-      ${t.meals?`<div class="panel-item"><span class="label">Meals</span>${t.meals}</div>`:''}
       <div class="panel-item"><span class="label">Scenery</span>${t.highlight}</div>
     </div>
     <p class="panel-note">${t.notes}</p>`;
@@ -685,7 +759,7 @@ function openDay(d, cellEl) {
   cellEl.classList.add('active');
   const dow = DOWS[d-6], dayT = dayTrainMap[d];
   const items = dayT.length
-    ? dayT.map(t=>`<div style="margin-bottom:10px;padding:8px 10px;border-left:3px solid ${t.color};background:var(--paper-dark)"><strong>#${t.num} ${t.name}</strong> &nbsp;<span style="color:var(--ink-faint);font-size:0.85rem">${t.fromFull} → ${t.toFull}</span><br><span style="color:var(--ink-faint);font-size:0.88rem">${t.notes}</span></div>`).join('')
+    ? dayT.map(t=>`<div style="margin-bottom:10px;padding:8px 10px;border-left:3px solid ${t.color};background:var(--paper-dark)"><strong>#${t.num} ${t.name}</strong> &nbsp;<span style="color:var(--ink-faint);font-size:0.85rem">${t.fromFull} → ${t.toFull}</span><br><span style="color:var(--ink-faint);font-size:0.82rem">${t.dep} dep · ${t.arr} arr · ~${t.hours}h · ${t.meals} meal${t.meals==='1'?'':'s'} on board</span><br><span style="color:var(--ink-faint);font-size:0.88rem">${t.notes}</span></div>`).join('')
     : `<p style="color:var(--ink-faint)">Rest / transition day.</p>`;
   document.getElementById('panel-content').innerHTML =
     `<div class="panel-title" style="border-left-color:var(--ink)">March ${d} · ${dow}</div>${items}`;
@@ -712,12 +786,12 @@ const R = {
 /* ─── STATIONS ────────────────────────────────── */
 const STATIONS = [
   { id:'WBG', label:'Williamsburg, VA',  lat:37.27, lon:-76.71, layover:'Home base' },
-  { id:'WAS', label:'Washington, DC',    lat:38.90, lon:-77.01, layover:'4-hr layover — Union Station' },
-  { id:'CHI', label:'Chicago, IL',       lat:41.88, lon:-87.63, layover:'3-hr (outbound) · 4½-hr (return) — Union Station' },
-  { id:'SAC', label:'Sacramento, CA',    lat:38.58, lon:-121.49,layover:'7-hr layover' },
-  { id:'PDX', label:'Portland, OR',      lat:45.52, lon:-122.68,layover:'1-hr layover' },
-  { id:'ALB', label:'Albany, NY',        lat:42.65, lon:-73.76, layover:'Train splits here — Boston section departs' },
-  { id:'BOS', label:'Boston, MA',        lat:42.35, lon:-71.06, layover:'12-hr layover' },
+  { id:'WAS', label:'Washington, DC',    lat:38.90, lon:-77.01, layover:'3 hr 21 min layover — Union Station' },
+  { id:'CHI', label:'Chicago, IL',       lat:41.88, lon:-87.63, layover:'3 hr 35 min (outbound) · 4 hr 45 min (return) — Union Station' },
+  { id:'SAC', label:'Sacramento, CA',    lat:38.58, lon:-121.49,layover:'7 hr 44 min layover' },
+  { id:'PDX', label:'Portland, OR',      lat:45.52, lon:-122.68,layover:'1 hr 5 min layover' },
+  { id:'ALB', label:'Albany-Rensselaer, NY', lat:42.65, lon:-73.76, layover:'34 min — train splits here, Boston section departs' },
+  { id:'BOS', label:'Boston, MA',        lat:42.35, lon:-71.06, layover:'~12 hr layover' },
 ];
 
 /* ─── LANDMARKS ───────────────────────────────── */
