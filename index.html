@@ -176,20 +176,19 @@
     .tt-date-band {
       display: grid;
       grid-template-columns: 80px 90px 1fr 110px;
-      background: var(--paper-dark);
-      border-top: 2px solid var(--ink);
       border-bottom: 1px solid var(--ink-faint);
       font-family: 'Special Elite', monospace;
       font-size: 0.88rem;
       font-weight: bold;
       color: var(--ink);
+      /* inherits bg from surrounding day group via JS-set inline style */
     }
     .tt-date-band .date-cell {
       grid-column: 1 / -1;
-      padding: 5px 12px;
+      padding: 6px 12px 5px;
       letter-spacing: 0.06em;
+      border-left: 4px solid var(--ink);
     }
-    .tt-date-band:first-of-type { border-top: none; }
 
     /* Individual row */
     .tt-row {
@@ -206,10 +205,8 @@
     /* Row types */
     .tt-row.type-depart .tt-time { font-family: 'Courier Prime', monospace; font-weight: 700; font-size: 0.9rem; }
     .tt-row.type-arrive .tt-time { font-family: 'Courier Prime', monospace; font-weight: 700; font-size: 0.9rem; color: var(--ink-faint); }
-    .tt-row.type-layover { background: var(--paper-darker, var(--paper-dark)); opacity: 0.85; }
     .tt-row.type-layover .tt-time { font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: var(--ink-faint); font-style: italic; }
     .tt-row.type-meal .tt-time { font-family: 'Courier Prime', monospace; font-size: 0.82rem; color: var(--ink-faint); }
-    .tt-row.type-meal { background: transparent; }
     .tt-row.type-meal .tt-event { color: var(--ink-faint); font-style: italic; font-size: 0.88rem; }
 
     .tt-time { min-width: 0; }
@@ -231,12 +228,41 @@
     .tt-row.type-layover .tt-event { font-size: 0.84rem; color: var(--ink-faint); }
     .layover-line { display: inline-block; height: 2px; background: var(--ink-faint); width: 18px; margin-right: 6px; vertical-align: middle; opacity: 0.4; }
 
-    /* Alternating day shading (light / dark) */
-    .tt-day-odd .tt-row  { background: transparent; }
-    .tt-day-even .tt-row { background: rgba(0,0,0,0.025); }
-    body.dark .tt-day-even .tt-row { background: rgba(255,255,255,0.025); }
-    .tt-day-odd .tt-row:hover,
-    .tt-day-even .tt-row:hover { background: var(--paper-mid); }
+    /* Alternating day backgrounds — clearly distinct */
+    .tt-day-odd  { background: var(--paper); }
+    .tt-day-even { background: var(--paper-dark); }
+    body.dark .tt-day-odd  { background: var(--paper); }
+    body.dark .tt-day-even { background: var(--paper-dark); }
+
+    /* Layover rows inherit the day bg but slightly darker */
+    .tt-day-odd  .tt-row.type-layover { background: rgba(0,0,0,0.045); }
+    .tt-day-even .tt-row.type-layover { background: rgba(0,0,0,0.06); }
+    body.dark .tt-day-odd  .tt-row.type-layover { background: rgba(255,255,255,0.04); }
+    body.dark .tt-day-even .tt-row.type-layover { background: rgba(0,0,0,0.18); }
+
+    .tt-day-odd  .tt-row:hover,
+    .tt-day-even .tt-row:hover { background: var(--paper-mid) !important; }
+
+    /* Day divider row between calendar days */
+    .tt-day-divider {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 80px 90px 1fr 110px;
+      border-top: 2px solid var(--ink);
+      border-bottom: 1px solid var(--ink-faint);
+    }
+    .tt-day-divider-inner {
+      grid-column: 1 / -1;
+      height: 3px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--ink) 0px,
+        var(--ink) 6px,
+        transparent 6px,
+        transparent 12px
+      );
+      opacity: 0.18;
+    }
 
     /* ── BOTTOM GRID ── */
     .bottom-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:28px; }
@@ -623,21 +649,50 @@ const TT_EVENTS = [
   let currentGroup = null;
 
   TT_EVENTS.forEach(ev => {
-    // Date band
+    // New day — insert divider + date band + new group
     if (ev.date !== currentDate) {
       currentDate = ev.date;
       dayIndex++;
+
+      // Thick divider row between days (skip before the very first day)
+      if (dayIndex > 0) {
+        const divider = document.createElement('div');
+        divider.style.cssText = `
+          border-top: 2.5px solid var(--ink);
+          display: grid;
+          grid-template-columns: 80px 90px 1fr 110px;
+        `;
+        const inner = document.createElement('div');
+        inner.style.cssText = `
+          grid-column: 1 / -1;
+          height: 3px;
+          background: repeating-linear-gradient(
+            90deg,
+            var(--ink) 0px, var(--ink) 5px,
+            transparent 5px, transparent 11px
+          );
+          opacity: 0.15;
+        `;
+        divider.appendChild(inner);
+        body.appendChild(divider);
+      }
+
+      // Date band
+      // (now appended into currentGroup below)
+
+      // Day group with alternating background — date band lives inside it
+      currentGroup = document.createElement('div');
+      currentGroup.className = dayIndex % 2 === 0 ? 'tt-day-odd' : 'tt-day-even';
+      body.appendChild(currentGroup);
+
+      // Date band appended into group (inherits bg)
       const band = document.createElement('div');
       band.className = 'tt-date-band';
       const cell = document.createElement('div');
       cell.className = 'date-cell';
       cell.textContent = ev.date;
       band.appendChild(cell);
-      body.appendChild(band);
-
-      currentGroup = document.createElement('div');
-      currentGroup.className = dayIndex % 2 === 0 ? 'tt-day-odd' : 'tt-day-even';
-      body.appendChild(currentGroup);
+      currentGroup.appendChild(band);
     }
 
     const train = ev.trainId ? trainMap[ev.trainId] : null;
